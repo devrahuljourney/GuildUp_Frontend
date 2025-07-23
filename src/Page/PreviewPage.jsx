@@ -23,6 +23,10 @@ export default function PreviewPage() {
   
 
   const submitHandler = async () => {
+    if (!subject || !message || recipients.length === 0 || !scheduleTime || !timezone) {
+      alert("Please fill all required fields before scheduling.");
+      return;
+    }
     setLoading(true);
     try {
       const res = await emailSchedular(

@@ -45,14 +45,14 @@ export default function FileUploadAndTimeSchedular() {
   const handleTimeChange = (e) => {
     const userInput = e.target.value;
     const selectedTime = new Date(userInput).getTime();
-    const oneHourLater = Date.now() + 60 * 60 * 1000;
+    const oneHourLater = Date.now() + 60 * 1000;
 
-    // if (selectedTime < oneHourLater) {
-    //   setError("Please select a time at least 1 hour from now.");
-    //   return;
-    // } else {
-    //   setError("");
-    // }
+    if (selectedTime < oneHourLater) {
+      setError("Please select a time at least 1 minute from now.");
+      return;
+    } else {
+      setError("");
+    }
 
     dispatch(setScheduleTime(userInput));
   };

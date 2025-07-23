@@ -1,24 +1,47 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
+import { emailSchedular } from '../services/operations/schedulerAPI';
+import { useLocation } from 'react-router-dom';
 
 export default function PreviewPage() {
   const {
     subject,
     message,
     recipients,
-    attachments,
     scheduleTime,
     timezone,
   } = useSelector(state => state.emailSchedular);
 
-  // ✅ Convert scheduleTime to IST + add 1 hour latency
+  const [loading, setLoading] = useState(false);
+
   const formattedTime = scheduleTime
-  ? new Date(new Date(scheduleTime).getTime() + 60 * 60 * 1000)
-      .toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })
-  : 'Not set';
+    ? new Date(scheduleTime).toLocaleString('en-IN', { timeZone: timezone })
+    : 'Not set';
 
+    const { state } = useLocation();
+    const attachments = state?.attachments || [];
+  
 
-
+  const submitHandler = async () => {
+    setLoading(true);
+    try {
+      const res = await emailSchedular(
+        subject,
+        message,
+        recipients,
+        attachments,
+        scheduleTime,
+        timezone
+      );
+      console.log("API Response:", res);
+      alert("Scheduled Successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong!");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#121212] text-white p-6">
@@ -67,14 +90,22 @@ export default function PreviewPage() {
         </div>
 
         <div className="mb-4">
-          <p className="text-[#B9FD50] font-semibold">Scheduled Time (IST + 1hr):</p>
+          <p className="text-[#B9FD50] font-semibold">Scheduled Time (IST):</p>
           <p className="ml-2 text-white">{formattedTime}</p>
         </div>
 
-        <div>
+        <div className="mb-4">
           <p className="text-[#B9FD50] font-semibold">Timezone:</p>
-          <p className="ml-2 text-white">Asia/Kolkata (IST)</p>
+          <p className="ml-2 text-white">{timezone}</p>
         </div>
+
+        <button
+          onClick={submitHandler}
+          className="bg-[#B9FD50] text-black px-6 py-2 mt-4 rounded-lg hover:bg-lime-400 transition-all duration-200"
+          disabled={loading}
+        >
+          {loading ? 'Scheduling...' : 'Confirm & Schedule'}
+        </button>
       </div>
     </div>
   );

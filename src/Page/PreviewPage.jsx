@@ -12,7 +12,6 @@ export default function PreviewPage() {
     timezone,
   } = useSelector(state => state.emailSchedular);
 
-  const [loading, setLoading] = useState(false);
 
   const formattedTime = scheduleTime
     ? new Date(scheduleTime).toLocaleString('en-IN', { timeZone: timezone })
@@ -22,30 +21,42 @@ export default function PreviewPage() {
     const attachments = state?.attachments || [];
   
 
-  const submitHandler = async () => {
-    if (!subject || !message || recipients.length === 0 || !scheduleTime || !timezone) {
-      alert("Please fill all required fields before scheduling.");
-      return;
-    }
-    setLoading(true);
-    try {
-      const res = await emailSchedular(
-        subject,
-        message,
-        recipients,
-        attachments,
-        scheduleTime,
-        timezone
-      );
-      console.log("API Response:", res);
-      alert("Scheduled Successfully!");
-    } catch (err) {
-      console.error(err);
-      alert("Something went wrong!");
-    } finally {
-      setLoading(false);
-    }
-  };
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [success, setSuccess] = useState(null);
+    
+    const submitHandler = async () => {
+      setError(null);
+      setSuccess(null);
+    
+      if (!subject || !message || recipients.length === 0 || !scheduleTime || !timezone) {
+        setError("Please fill all required fields before scheduling.");
+        return;
+      }
+    
+      setLoading(true);
+      try {
+        const res = await emailSchedular(
+          subject,
+          message,
+          recipients,
+          attachments,
+          scheduleTime,
+          timezone
+        );
+        setSuccess("Scheduled successfully!");
+      } catch (err) {
+        console.error(err);
+        const errMsg =
+          err?.response?.data?.message ||
+          err?.message ||
+          "Something went wrong!";
+        setError(errMsg);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
 
   return (
     <div className="min-h-screen bg-[#121212] text-white p-6">
@@ -110,6 +121,19 @@ export default function PreviewPage() {
         >
           {loading ? 'Scheduling...' : 'Confirm & Schedule'}
         </button>
+
+        {error && (
+  <div className="bg-red-500 text-white px-4 py-2 rounded mb-4">
+    ❌ {error}
+  </div>
+)}
+
+{success && (
+  <div className="bg-green-500 text-white px-4 py-2 rounded mb-4">
+    ✅ {success}
+  </div>
+)}
+
       </div>
     </div>
   );

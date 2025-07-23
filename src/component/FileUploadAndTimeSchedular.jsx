@@ -20,7 +20,7 @@ export default function FileUploadAndTimeSchedular() {
 
   useEffect(() => {
     if (!scheduleTime) {
-      const oneHourLater = new Date(Date.now() + 60 * 60 * 1000);
+      const oneHourLater = new Date(Date.now() + 60 * 1000);
       dispatch(setScheduleTime(getLocalISOString(oneHourLater)));
     }
   }, [dispatch, scheduleTime]);
